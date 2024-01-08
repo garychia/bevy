@@ -174,6 +174,21 @@ impl Command for PushChild {
     }
 }
 
+/// Command that pops a child from an entity.
+#[derive(Debug)]
+pub struct PopChild {
+    /// Parent entity to pop the child from.
+    pub parent: Entity,
+}
+
+impl Command for PopChild {
+    fn apply(self, world: &mut World) {
+        if let Some(mut children) = world.entity_mut(self.parent).get_mut::<Children>() {
+            children.0.pop();
+        }
+    }
+}
+
 /// Command that inserts a child at a given index of a parent's children, shifting following children back.
 #[derive(Debug)]
 pub struct InsertChildren {
@@ -200,6 +215,24 @@ pub struct PushChildren {
 impl Command for PushChildren {
     fn apply(self, world: &mut World) {
         world.entity_mut(self.parent).push_children(&self.children);
+    }
+}
+
+/// Command that pops [`Children`] from an entity.
+#[derive(Debug)]
+pub struct PopChildren {
+    /// Parent entity to pop the children from
+    parent: Entity,
+    /// Number of children to be popped
+    number: usize,
+}
+
+impl Command for PopChildren {
+    fn apply(self, world: &mut World) {
+        if let Some(mut children) = world.entity_mut(self.parent).get_mut::<Children>() {
+            let len = children.0.len();
+            children.0.drain(len - self.number..);
+        }
     }
 }
 
